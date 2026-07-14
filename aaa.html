@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Webcam Access</title>
+</head>
+<body>
+    <h2>Live Webcam Feed</h2>
+    <!-- The stream will render directly inside this element -->
+    <video id="webcam" autoplay playsinline width="640" height="480"></video>
+    <br>
+    <button id="capture">Take Photo</button>
+    <br><br>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <h3>Captured Photo</h3>
+    <img id="photo" alt="Captured photo will appear here" width="640" height="480">
+
+    <script>
+        // Grab the HTML video element
+        const videoElement = document.getElementById('webcam');
+        const captureButton = document.getElementById('capture');
+        const canvasElement = document.getElementById('canvas');
+        const photoElement = document.getElementById('photo');
+
+        // Configure what media inputs you want to access
+        const constraints = {
+            video: {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: "user" // Use "environment" for the back camera on mobile
+            },
+            audio: false // Set to true if you also need the microphone
+        };
+
+        // Request webcam access from the user
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then((stream) => {
+                // Assign the stream to the video element's source object
+                videoElement.srcObject = stream;
+            })
+            .catch((error) => {
+                // Handle denied permissions or missing hardware
+                console.error("Error accessing the webcam: ", error.name);
+            });
+
+        // Capture photo from video stream
+        captureButton.addEventListener('click', () => {
+            const context = canvasElement.getContext('2d');
+            // Draw current video frame onto canvas
+            context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            // Convert canvas image to data URL and set as image source
+            const dataUrl = canvasElement.toDataURL('image/png');
+            photoElement.src = dataUrl;
+        });
+    </script>
+</body>
+</html>
